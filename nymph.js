@@ -1,4 +1,4 @@
-var Synch = function(parent, name, data) {
+var Nymph = function(parent, name, data) {
   this.name = name
   this.data = data
   this.parent = parent
@@ -17,19 +17,19 @@ var Synch = function(parent, name, data) {
   }
 
   this.infect = function() {
-    var synch_obj = this
+    var Nymph_obj = this
     if(this.data && this.data.constructor == Array) {
-      synch_obj.children = []
+      Nymph_obj.children = []
       $.each(this.data, function(i, data) {
-        synch_obj.children.push(new Synch(synch_obj, i, data))
-        synch_obj.children[i].infect()
+        Nymph_obj.children.push(new Nymph(Nymph_obj, i, data))
+        Nymph_obj.children[i].infect()
       })
     }
     else if(this.data && this.data.constructor == Object) {
-      synch_obj.children = {}
+      Nymph_obj.children = {}
       $.each(this.data, function(key, data) {
-        synch_obj.children[key] = new Synch(synch_obj, key, data)
-        synch_obj.children[key].infect()
+        Nymph_obj.children[key] = new Nymph(Nymph_obj, key, data)
+        Nymph_obj.children[key].infect()
       })
     }
   }

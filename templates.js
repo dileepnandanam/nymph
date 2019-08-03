@@ -1,6 +1,6 @@
 var response = {
   name: 'MySite',
-  welcome_text: 'Helo Synch User',
+  welcome_text: 'Helo Nymph User',
   footer_text: 'Quit',
   posts: [
     {title: 'title_1', body: 'body body', comments: [
@@ -12,39 +12,9 @@ var response = {
       {author: 'author', text: 'hello'},
       {author: 'author', text: 'hello'},
       {author: 'author', text: 'hello'}
-    ]},
-    {title: 'title_3', body: 'body body', comments: [
-      {author: 'author', text: 'hello'},
-      {author: 'author', text: 'hello'},
-      {author: 'author', text: 'hello'}
     ]}
   ]
 }
-
-partials = {}
-
-partials['post'] = `
-  <div class='post'>
-    {{title}}
-    <div class='comments' type="partial" partial="comment" collection="comments">
-    </div>
-  </div>
-`
-
-partials['posts'] = `
-
-  <div class="posts">
-    <div type="partial" collection="posts" partial="post">
-
-    </div>
-  </div>
-`
-partials['comment'] = `
-  <div class='comment'>
-    {{author}}
-    {{text}}
-  </div>
-`
 
 var eval_attr_access = function(env, chain) {
   chain = chain || ''
@@ -67,6 +37,17 @@ var eval_attr_access = function(env, chain) {
   return data
 }
 
+var update = function(path, data) {
+  s_obj = eval_attr_access(root_tree, path)
+  if(s_obj.data != data) {
+    s_obj.data = data
+    s_obj.children = null
+    s_obj.infect()
+    partial = $('#' + s_obj.trace_back())
+    $(partial).html('')
+    render($(partial).parent(), s_obj.parent)
+  }
+}
 
 var render = function(partial, env) {
   htm = $(partial).html()
@@ -83,7 +64,7 @@ var render = function(partial, env) {
       var model = $(partial).attr('model')
       var nested_env = eval_attr_access(new_env, model)
       var nested_partial = partials[$(partial).attr('partial')]
-      $(partial).attr('id', env.trace_back())
+      $(partial).attr('id', env.trace_back() + '_' + model)
       $(partial).html(nested_partial)
       render($(partial), nested_env)
     }
@@ -91,7 +72,7 @@ var render = function(partial, env) {
       var collection = $(partial).attr('collection')
       var nested_env = eval_attr_access(new_env, collection)
       var nested_partial = partials[$(partial).attr('partial')]
-      $(partial).attr('id', env.trace_back())
+      $(partial).attr('id', env.trace_back() + '_' + collection)
       $.each(nested_env.children, function(i, model) {
         $(partial).append(nested_partial)
         render($(partial).children()[$(partial).children().length -1], nested_env.children[i])
@@ -101,9 +82,10 @@ var render = function(partial, env) {
 }
 
 
-root_tree = new Synch({}, 'Response', response)
+root_tree = new Nymph({}, 'Response', response)
 root_tree.infect()
 
 $(document).ready(function() {
   render($('body'), root_tree)
+  
 })
