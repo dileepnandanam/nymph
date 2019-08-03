@@ -24,9 +24,9 @@ var response = {
 partials = {}
 
 partials['post'] = `
-  {{title}}
-  <div class='post' type="partial">
-    <div class="comment" type="partial" partial="comment" model="comments[0]">
+  <div class='post'>
+    {{title}}
+    <div class='comments' type="partial" partial="comment" collection="comments">
     </div>
   </div>
 `
@@ -72,29 +72,29 @@ var render = function(partial, env) {
   htm = $(partial).html()
   $(partial).html(
     $(partial).html().replace(/\{\{(.*)\}\}/g, function($1,$2){
-      return '<span id="' + env.trace_back() + '">' + eval_attr_access(env, $2).data + '</span>' 
+      return '<span id="' + env.trace_back() + '_' + $2 + '">' + eval_attr_access(env, $2).data + '</span>' 
     })
   )
   var new_env = env
-  $.each($(partial).find('[type="partial"]'), function(i, partial) {
+  $.each($(partial).find('[partial]'), function(i, partial) {
     var collection = $(partial).attr('collection')
     var model = $(partial).attr('model')
     if(model) {
       var model = $(partial).attr('model')
       var nested_env = eval_attr_access(new_env, model)
-      var neste_partial = partials[$(partial).attr('partial')]
+      var nested_partial = partials[$(partial).attr('partial')]
       $(partial).attr('id', env.trace_back())
-      $(partial).html(neste_partial)
+      $(partial).html(nested_partial)
       render($(partial), nested_env)
     }
     else if(collection) {
       var collection = $(partial).attr('collection')
       var nested_env = eval_attr_access(new_env, collection)
-      var neste_partial = partials[$(partial).attr('partial')]
-      $.each(env.children, function(i, model) {
-        $(partial).attr('id', env.trace_back())
-        $(partial).append(neste_partial)
-        render($(partial), nested_env)
+      var nested_partial = partials[$(partial).attr('partial')]
+      $(partial).attr('id', env.trace_back())
+      $.each(nested_env.children, function(i, model) {
+        $(partial).append(nested_partial)
+        render($(partial).children()[$(partial).children().length -1], nested_env.children[i])
       })
     }
   })
