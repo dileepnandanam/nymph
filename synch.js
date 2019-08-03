@@ -1,19 +1,15 @@
-class SymchElem extends HTMLElement {}
-
-window.customElements.define('s-yn', SymchElem);
-
 var Synch = function(parent, name, data) {
   this.name = name
   this.data = data
   this.parent = parent
-  this.trace_back = function(child_refs) {
-    if(!this.traceback)
-      return(child_refs)
+  this.trace_back = function() {
+    if(parent.trace_back)
+      return parent.trace_back() + '_' + name
     else
-      return this.parent.traceback(name + child_refs)
+      return this.name
   }
   this.generate_pointer = function() {
-    return this.trace_back('', this.name)
+    return this.trace_back(this.name)
   }
   this.pointer = this.generate_pointer()
   this.node = function() {
@@ -39,11 +35,6 @@ var Synch = function(parent, name, data) {
   }
 }
 
-var data = {
-  name: 'MySite',
-  welcome_text: 'Helo Synch User',
-  footer_text: 'Quit'
+var Missing = function(env, attr){
+  return {data: 'Nymph::MissingAttribute(' + env.trace_back() + '_' + attr + ')'}
 }
-
-e = new Synch(data, 'root', data)
-e.infect()
