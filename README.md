@@ -54,5 +54,7 @@ To get started:
     $('.main').render(data, 'scope_name')
     
 #To Do
-Conditional rendering
+
+Conditional rendering.
+
 Replace html corresponding to only those nodes with changes on updation. The node dom mapings are there.
