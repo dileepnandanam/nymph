@@ -97,7 +97,7 @@ var Missing = function(env, attr){
 }
 
 $.fn.extend({
-  render: function(data, scope, path) {
+  render: function(data, scope) {
     that = this
     if(!window.nymph_partials)
       console.log('No partials found. Store partials like window.nymph_partials = {partial_name: "<div>..</div>"}')
