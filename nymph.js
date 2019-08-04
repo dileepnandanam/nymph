@@ -43,6 +43,7 @@ var Nymph = function(parent, name, data) {
         return '<span id="' + env.trace_back() + '_' + $2 + '">' + env.eval_attr_access($2).data + '</span>' 
       })
     )
+    $(partial).closest('[partial]').attr('id', env.trace_back())
     var new_env = env
     $.each($(partial).find('[partial]'), function(i, partial) {
       var collection = $(partial).attr('collection')
@@ -68,18 +69,6 @@ var Nymph = function(parent, name, data) {
     })
   }
 
-  this.update = function(scope, path, data) {
-    s_obj = window.dataset[scope].eval_attr_access(path)
-    if(s_obj.data != data) {
-      s_obj.data = data
-      s_obj.children = null
-      s_obj.infect()
-      partial = $('#' + s_obj.trace_back())
-      $(partial).html('')
-      render($(partial).parent(), s_obj.parent)
-    }
-  }
-
   this.eval_attr_access = function(chain) {
     chain = chain || ''
     chain = chain.split('.')
@@ -92,45 +81,29 @@ var Nymph = function(parent, name, data) {
         data = data.children[accessor].children[array_index]
       }
       else {
-        if(data.children[attr])
-          data = data.children[attr]
-        else
-          data = Missing(env, attr)
+        if(!$.isEmptyObject(attr))
+          if(data.children[attr])
+            data = data.children[attr]
+          else 
+            data = Missing(env, attr)
       }
     })
     return data
   }
 }
 
-var eval_attr_access = function(env, chain) {
-  chain = chain || ''
-  chain = chain.split('.')
-  var data = env
-  $.each(chain, function(i, attr) {
-    if(attr.indexOf('[') > -1) {
-      array_element_fetcher = attr.match(/(.*)\[(.*)\]/)
-      accessor = array_element_fetcher[1]
-      array_index = parseInt(array_element_fetcher[2])
-      data = data.children[accessor].children[array_index]
-    }
-    else {
-      if(data.children[attr])
-        data = data.children[attr]
-      else
-        data = Missing(env, attr)
-    }
-  })
-  return data
-}
-
 var Missing = function(env, attr){
   return {data: 'Nymph::MissingAttribute(' + env.trace_back() + '_' + attr + ')'}
 }
-window.dataset = window.dataset || {}
+
 $.fn.extend({
-  render: function(data, scope) {
-    
-    if($(this).find('[type="partial"]').length > 0) {
+  render: function(data, scope, path) {
+    that = this
+    if(!window.nymph_partials)
+      console.log('No partials found. Store partials like window.nymph_partials = {partial_name: "<div>..</div>"}')
+    else if($(this).find('[type="partial"]').length > 0) {
+      if(dataset[scope])
+        $(that).find('[partial').html('')
       window.dataset[scope] = new Nymph({}, scope, data)
       window.dataset[scope].render($(this), window.dataset[scope])
       return window.dataset[scope]
@@ -148,5 +121,5 @@ $.fn.extend({
 
 })
 
-$(document).ready(function(){$('body').render(response, 'root') })
+window.dataset = window.dataset || {}
 
