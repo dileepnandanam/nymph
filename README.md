@@ -26,7 +26,7 @@ To get started:
         `,
         author: `
              <div class="some-class">
-                 {{name}} // author.name where auther is given as model attribute on the parent partial which is oist
+                 {{name}} // author.name where auther is given as model attribute on the parent partial
              </div>
         `
     }
